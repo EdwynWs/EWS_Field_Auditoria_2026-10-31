@@ -1,0 +1,41 @@
+✔ backup hashes file streams and rejects symlink traversal (14.462654ms)
+✔ backup refuses unpaused writes and recursive destinations before pg_dump (0.600893ms)
+✔ backup CLI executes and fails explicitly when configuration is missing (55.14374ms)
+✔ health and readiness (3815.270884ms)
+✔ missing, malformed, expired and wrong-audience JWT rejected (7.353562ms)
+✔ company isolation in lists, customers, users, dashboard (22.704325ms)
+✔ technician cannot access manager functions or peer orders (25.796242ms)
+✔ cross-tenant foreign keys denied by API and database (13.282641ms)
+✔ IDOR denied for status, visits, reports, assignment and media (56.764803ms)
+✔ tenant and role supplied by client cannot override server authority (7.097063ms)
+✔ invalid UUID, SQL injection, invalid JSON and payload limits (76.403309ms)
+✔ password length, UTF-8 bcrypt truncation and field bounds (11.887681ms)
+✔ assignment after creation validates company and active technician (16.748736ms)
+✔ checkout without checkin, early completion and manual start rejected (18.992336ms)
+✔ uploads reject SVG, spoofed image, excessive resolution and poor GPS (12.170681ms)
+✔ concurrent duplicate checkins create exactly one visit (21.97108ms)
+✔ image decoder rejects excessive pixels and reports reject more than five photos (277.550343ms)
+✔ private photos require owning company or assigned technician; base64 not persisted (24.860461ms)
+✔ active visit blocks cancellation and reassignment (8.693638ms)
+✔ idempotent checkout replay; changed payload with same key rejected (21.99066ms)
+✔ report idempotency, photo authorization, completion and immutable closed order (56.476225ms)
+✔ manager can cancel an active visit with a reason, retaining evidence (40.640136ms)
+✔ pagination is bounded and deterministic (15.617788ms)
+✔ marketing persists validated consent, ignores honeypot, rejects invalid email (14.827727ms)
+✔ logout revokes a token on all protected endpoints (15.184694ms)
+✔ deactivation revokes sessions and reactivation does not revive old tokens (18.369739ms)
+✔ current role and company suspension are enforced on every request (6.386793ms)
+✔ password change revokes all sessions and old password fails (1235.243008ms)
+✔ shared database rate limiter emits 429 (7.545502ms)
+✔ logs exclude PII, passwords, JWTs, coordinates and request bodies (0.322004ms)
+✔ production config fails closed without HTTPS and strong secret (0.294608ms)
+✔ migration keeps legacy records and base64 evidence, and is repeatable (1368.910421ms)
+✔ cross-tenant legacy corruption aborts migration without changing or deleting records (1052.446533ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9070.526206

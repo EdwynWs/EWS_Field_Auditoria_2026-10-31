@@ -1,0 +1,1 @@
+PASS: URL ausente/insegura/privada/fictícia/com credenciais/path recusada; configuração preservada; APK e AAB separados. Nenhuma chamada à API de exemplo.

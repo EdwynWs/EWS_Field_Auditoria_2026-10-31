@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-31",
+  "base": "43469b69d41cf1d815456edd0b4a6ecb625dcc5d",
+  "branch": "security/commercial-readiness",
+  "node": "v24.22.1",
+  "database": "PGlite (PostgreSQL WebAssembly), conexoes serializadas; nao e PostgreSQL 16 servidor",
+  "browser": "Chromium headless 153.0.8010.0 (binario local), Playwright 1.64.1",
+  "lockfile_sha256": "46632f445616427869ab82733ff2d7095a8f477046187aaec2513120ad9fbba5",
+  "not_executed": [
+    "PostgreSQL 16 nativo",
+    "pg_dump/pg_restore",
+    "EAS Build/APK",
+    "Android fisico/emulador",
+    "Docker",
+    "deploy HTTPS",
+    "GitHub Actions",
+    "Lighthouse/carga/WCAG completa"
+  ],
+  "logs": "Resumos filtrados dos logs locais; somente dados sinteticos foram utilizados."
+}

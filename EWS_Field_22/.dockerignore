@@ -1,0 +1,8 @@
+.git
+**/node_modules
+**/.env*
+**/.next
+**/dist
+**/private-media
+**/backups
+upload

@@ -1,0 +1,1 @@
+export default function robots(){const base=process.env.SITE_URL;return {rules:{userAgent:'*',allow:'/',disallow:['/painel','/api/','/comecar']},...(base?{sitemap:new URL('/sitemap.xml',base).href}:{})};}

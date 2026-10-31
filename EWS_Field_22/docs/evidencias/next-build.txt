@@ -1,0 +1,18 @@
+ ✓ Compiled successfully in 1722ms
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      178 B         115 kB
+├ ○ /_not-found                            996 B         103 kB
+├ ƒ /api/leads                             138 B         102 kB
+├ ƒ /api/panel/[...path]                   138 B         102 kB
+├ ƒ /api/signup                            138 B         102 kB
+├ ○ /comecar                             1.88 kB         116 kB
+├ ○ /painel                              10.9 kB         116 kB
+├ ○ /privacidade                         2.41 kB         108 kB
+├ ○ /robots.txt                            138 B         102 kB
+└ ○ /sitemap.xml                           138 B         102 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/131-445671fb2fcaaadf.js       45.7 kB
+  ├ chunks/c7879cf7-b5ab1053c1d9a2e7.js  54.2 kB
+  └ other shared chunks (total)          1.93 kB
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

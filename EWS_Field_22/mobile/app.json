@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "EWS Field",
+    "slug": "ews-field",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "android": {
+      "package": "com.ewstech.ewsfield",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "versionCode": 1
+    },
+    "ios": {
+      "bundleIdentifier": "com.ewstech.ewsfield",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Usamos sua localização apenas quando você registra chegada ou saída de um atendimento.",
+        "NSCameraUsageDescription": "Usamos a câmera para comprovar atendimentos."
+      }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O GPS é usado apenas ao registrar visitas."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Permitir fotos de atendimentos?",
+          "photosPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      "expo-secure-store"
+    ]
+  }
+}
