@@ -1,26 +1,42 @@
-// Metro 0.83 imports image-size 1.x as a callable CommonJS export.
-// image-size 2.0.4 fixes DoS advisories and exposes the function as imageSize.
-// Apply exactly this compatibility change; fail on upstream drift for review.
+
 import { createRequire } from "node:module";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+
 const require = createRequire(import.meta.url);
-let filename;
-try {
-  filename = path.join(
-    path.dirname(require.resolve("metro/package.json")),
-    "src/Assets.js",
-  );
-} catch {
-  process.exit(0);
-} // API-only production install does not include Metro.
-const before =
+
+const filename = path.join(
+  path.dirname(require.resolve("metro/package.json")),
+  "src/Assets.js"
+);
+
+const original =
   'var _imageSize = _interopRequireDefault(require("image-size"));';
-const after = 'var _imageSize = { default: require("image-size").imageSize };';
+
+const patchedOld =
+  'var _imageSize = { default: require("image-size").imageSize };';
+
+const patchedNew =
+  'var _imageSize = { default: (input) => require("image-size").imageSize(typeof input === "string" ? require("fs").readFileSync(input) : input) };';
+
 const source = await readFile(filename, "utf8");
-if (source.includes(before))
-  await writeFile(filename, source.replace(before, after));
-else if (!source.includes(after))
-  throw Error(
-    "Metro import changed; review the image-size compatibility patch.",
+
+if (source.includes(patchedNew)) {
+  console.log("Metro já corrigido.");
+} else if (source.includes(patchedOld)) {
+  await writeFile(
+    filename,
+    source.replace(patchedOld, patchedNew)
   );
+  console.log("Compatibilidade Metro corrigida.");
+} else if (source.includes(original)) {
+  await writeFile(
+    filename,
+    source.replace(original, patchedNew)
+  );
+  console.log("Compatibilidade Metro corrigida.");
+} else {
+  throw new Error(
+    "Versão do Metro diferente da esperada. Revisar Assets.js."
+  );
+}
