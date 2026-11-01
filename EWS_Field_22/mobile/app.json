@@ -44,6 +44,12 @@
         }
       ],
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "535fa246-8385-4295-a7fd-4fc85549250f"
+      }
+    },
+    "owner": "edwyn007"
   }
 }

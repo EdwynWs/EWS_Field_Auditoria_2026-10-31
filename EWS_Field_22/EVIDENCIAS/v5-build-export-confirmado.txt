@@ -1,0 +1,4 @@
+Validação 2026-11-01, execução direta dos CLIs, exit code 0 em ambos.
+Next: node ../node_modules/next/dist/bin/next build (cwd web). Compilado, 11 páginas geradas, home 13.4 kB, First Load JS 119 kB.
+Expo: node ../node_modules/expo/bin/cli export --platform android (cwd mobile). Exported: dist, bundle _expo/static/js/android/index-12b06f94535453cd069ec6b8f5e54e4e.hbc (2.27 MB).
+Registro resumido dos resultados retornados pelo executor; não é log bruto. APK não foi gerado.
