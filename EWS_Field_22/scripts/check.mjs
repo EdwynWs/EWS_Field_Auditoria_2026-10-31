@@ -13,9 +13,11 @@ for (const [cmd, args] of [
       "web/app/api",
       "mobile/config.js",
       "mobile/session.js",
+      "mobile/outbox.js",
+      "mobile/outbox-codec.mjs",
       "mobile/app.config.js",
       "mobile/eas.json",
-      ".github/workflows",
+      "../.github/workflows",
     ],
   ],
 ]) {

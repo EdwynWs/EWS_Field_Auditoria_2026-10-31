@@ -13,6 +13,7 @@ export async function migrate(db = pool) {
     for (const [name, file] of [
       ["001_base", "../sql/schema.sql"],
       ["002_security", "../sql/migrations/002_security.sql"],
+      ["003_password_recovery", "../sql/migrations/003_password_recovery.sql"],
     ]) {
       const sql = await readFile(new URL(file, import.meta.url), "utf8");
       const hash = createHash("sha256").update(sql).digest("hex");

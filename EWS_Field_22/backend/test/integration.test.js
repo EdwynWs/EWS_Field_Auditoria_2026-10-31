@@ -1,3 +1,4 @@
+import { issueRecovery, tokenHash } from "../src/recovery.js";
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
@@ -206,6 +207,57 @@ test("company isolation in lists, customers, users, dashboard", async () => {
     ),
   );
   assert.equal((await ok("/dashboard", { token: A.token })).total, 1);
+});
+test("order search filters remain scoped to tenant and assigned technician", async () => {
+  assert.deepEqual(
+    (await ok("/orders?q=Cliente%20A&status=assigned", { token: A.token })).map(
+      (x) => x.id,
+    ),
+    [oa.id],
+  );
+  assert.deepEqual(await ok("/orders?q=Cliente%20B", { token: A.token }), []);
+  assert.deepEqual(
+    await ok(`/orders?technician_id=${ta.id}`, { token: t2.token }),
+    [],
+  );
+  assert.deepEqual(
+    await ok(`/orders?customer_id=${cb.id}`, { token: A.token }),
+    [],
+  );
+  assert.equal(
+    (await call("/orders?status=invalid", { token: A.token })).status,
+    400,
+  );
+  assert.deepEqual(await ok("/orders?q=%25", { token: A.token }), []);
+});
+test("company exports are manager-only, paginated and omit authentication secrets", async () => {
+  assert.equal(
+    (await call("/company/export/users", { token: ta.token })).status,
+    403,
+  );
+  const users = await ok("/company/export/users", { token: A.token });
+  assert.ok(users.length > 0);
+  assert.ok(
+    users.every(
+      (u) =>
+        !("password_hash" in u) &&
+        !("token" in u) &&
+        u.email !== "b@example.test",
+    ),
+  );
+  assert.deepEqual(
+    (await ok("/company/export/customers", { token: A.token })).map(
+      (c) => c.id,
+    ),
+    [ca.id],
+  );
+  assert.equal(
+    (await call("/company/export/sessions", { token: A.token })).status,
+    404,
+  );
+  const page = await call("/company/export/users?limit=1", { token: A.token });
+  assert.equal(page.data.length, 1);
+  assert.equal(page.headers.get("x-next-offset"), "1");
 });
 test("technician cannot access manager functions or peer orders", async () => {
   for (const route of ["/users", "/customers", "/orders"])
@@ -777,6 +829,61 @@ test("password change revokes all sessions and old password fails", async () => 
     ).status,
     401,
   );
+});
+test("support recovery expires, is single-use and revokes all sessions", async () => {
+  const u = await user(
+    {
+      token: (
+        await ok("/auth/login", {
+          method: "POST",
+          body: {
+            email: "a@example.test",
+            password: "New-testing-password42!",
+          },
+        })
+      ).token,
+    },
+    "recovery_user",
+  );
+  const first = await issueRecovery(db, "recovery_user@example.test");
+  const second = await issueRecovery(db, "recovery_user@example.test");
+  const reset = (token) =>
+    call("/auth/reset-password", {
+      method: "POST",
+      body: { token, new_password: "Recovered-password42!" },
+    });
+  assert.equal((await reset(first)).status, 400);
+  await db.query(
+    "UPDATE password_reset_tokens SET expires_at=now()-interval '1 minute' WHERE token_hash=$1",
+    [tokenHash(second)],
+  );
+  assert.equal((await reset(second)).status, 400);
+  const token = await issueRecovery(db, "recovery_user@example.test");
+  assert.equal((await reset(token)).status, 200);
+  assert.equal((await reset(token)).status, 400);
+  assert.equal((await call("/me", { token: u.token })).status, 401);
+  assert.equal(
+    (
+      await call("/auth/login", {
+        method: "POST",
+        body: { email: "recovery_user@example.test", password: pass },
+      })
+    ).status,
+    401,
+  );
+  const login = await ok("/auth/login", {
+    method: "POST",
+    body: {
+      email: "recovery_user@example.test",
+      password: "Recovered-password42!",
+    },
+  });
+  assert.equal(login.user.id, u.id);
+  const stored = await db.query(
+    "SELECT * FROM password_reset_tokens WHERE user_id=$1",
+    [u.id],
+  );
+  assert.equal(stored.rowCount, 0);
 });
 test("shared database rate limiter emits 429", async () => {
   const app = express();

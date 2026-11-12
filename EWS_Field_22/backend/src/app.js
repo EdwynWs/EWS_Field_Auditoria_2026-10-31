@@ -1,3 +1,5 @@
+import { recoveryRoute } from "./recovery.js";
+import { exportRouter } from "./export.js";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -69,7 +71,7 @@ export function createApp(
     "/ready",
     wrap(async (_, res) => {
       const q = await db.query(
-        "SELECT name FROM schema_migrations WHERE name='002_security'",
+        "SELECT name FROM schema_migrations WHERE name='003_password_recovery'",
       );
       if (!q.rowCount) throw fail(503, "Migrações pendentes.");
       res.json({ ok: true });
@@ -78,6 +80,7 @@ export function createApp(
   app.use(limiter(db, config.secret, "edge", 600, 60));
   app.use(express.json({ limit: "14mb", strict: true }));
   const { auth, issue } = sessionSecurity(db, config);
+  recoveryRoute(app, db, config);
   const authLimit = limiter(db, config.secret, "auth", 20, 900);
   app.post(
     "/auth/register",
@@ -370,6 +373,7 @@ export function createApp(
       res.status(201).json(result);
     }),
   );
+  app.use("/company/export", exportRouter(db));
   app.use("/orders", ordersRouter(db, config));
   app.use((req, res) =>
     res.status(404).json({ error: "Rota não encontrada.", request_id: req.id }),

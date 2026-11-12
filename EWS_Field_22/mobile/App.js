@@ -11,6 +11,7 @@ import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
 import { API_URL } from './config';
 import { session } from './session';
+import { outbox } from './outbox';
 import * as Crypto from 'expo-crypto';
 
 const P = {
@@ -127,18 +128,26 @@ function AppContent() {
   const manager = me?.role === 'manager';
   const sessionEpoch=useRef(0);
   const pendingRequests=useRef(new Map());
+  const activeUser=useRef(null);
+  const [pendingCount,setPendingCount]=useState(0);
   const pendingVisit=useRef(null);
   const [historyRevision,setHistoryRevision]=useState(0);
   const [visits,setVisits]=useState([]);
   const [reports,setReports]=useState([]);
 
-  async function api(path, method = 'GET', body, t = token) {
+  async function api(path, method = 'GET', body, t = token, replay = null) {
     const epoch=sessionEpoch.current;
     let response;
     const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),30000);
+
     const signature=await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256,method+path+JSON.stringify(body));
     const needsKey=method==='POST' && /\/(visits|reports)$/.test(path);
+    const owner=activeUser.current;
+    const durable=needsKey && Platform.OS!=='web' ? (replay || await outbox.enqueue(owner,path,body)) : null;
+    if(epoch!==sessionEpoch.current)throw Error('A sessão mudou. O envio foi preservado para a conta original.');
+    if(durable)setPendingCount((await outbox.list(owner)).length);
+    const timeout=setTimeout(()=>controller.abort(),30000);
+    if(durable)pendingRequests.current.set(signature,durable.key);
     if(needsKey&&!pendingRequests.current.has(signature))pendingRequests.current.set(signature,Crypto.randomUUID());
     try {
       response = await fetch(`${API_URL}${path}`, {
@@ -147,10 +156,11 @@ function AppContent() {
         headers: { 'Content-Type': 'application/json', ...(t ? { Authorization: `Bearer ${t}` } : {}), ...(needsKey?{'Idempotency-Key':pendingRequests.current.get(signature)}:{}) },
         body: body === undefined ? undefined : JSON.stringify(body),
       });
-    } catch (_) { throw Error('Conexão interrompida ou lenta. Tente novamente; o registro será confirmado pelo servidor.'); } finally {clearTimeout(timeout);}
+    } catch (_) { if(durable && !replay){if(epoch===sessionEpoch.current)setPendingCount((await outbox.list(owner)).length);return {queued:true};} throw Error('Conexão interrompida. O envio permanece salvo para sincronização.'); } finally {clearTimeout(timeout);}
     const data = await response.json().catch(() => ({}));
     if(epoch!==sessionEpoch.current)throw Error('A sessão mudou. Entre novamente para continuar.');
-    if (!response.ok) {if(response.status===401){sessionEpoch.current++;await session.clear();setToken('');setMe(null);setOrders([]);setCustomers([]);setTeam([]);setSelected(null);setVisits([]);setReports([]);setPhotos([]);setNotes('');setPassword('');setStats(null);setCustomerName('');setCustomerPhone('');setCustomerAddress('');setNewName('');setNewEmail('');setNewPassword('');setOrderTitle('');setDescription('');setCustomerId('');setTechId('');pendingRequests.current.clear();pendingVisit.current=null;} const err=Error(data.error || `Erro ${response.status}`);err.status=response.status;throw err;}
+    if (!response.ok) {if(durable && response.status>=500 && !replay){setPendingCount((await outbox.list(owner)).length);return {queued:true};}if(response.status===401){sessionEpoch.current++;activeUser.current=null;setPendingCount(0);await session.clear();setToken('');setMe(null);setOrders([]);setCustomers([]);setTeam([]);setSelected(null);setVisits([]);setReports([]);setPhotos([]);setNotes('');setPassword('');setStats(null);setCustomerName('');setCustomerPhone('');setCustomerAddress('');setNewName('');setNewEmail('');setNewPassword('');setOrderTitle('');setDescription('');setCustomerId('');setTechId('');pendingRequests.current.clear();pendingVisit.current=null;} const err=Error(data.error || `Erro ${response.status}`);err.status=response.status;throw err;}
+    if(durable){await outbox.remove(owner,durable);if(epoch===sessionEpoch.current)setPendingCount((await outbox.list(owner)).length);}
     pendingRequests.current.delete(signature);
     if(method!=='GET' && /\/(visits|reports)$/.test(path))setHistoryRevision(n=>n+1);
     if(Array.isArray(data))Object.defineProperty(data,'nextOffset',{value:response.headers.get('X-Next-Offset')});
@@ -167,6 +177,8 @@ function AppContent() {
         user.role === 'manager' ? api('/users', 'GET', undefined, t) : Promise.resolve([]),
       ]);
       if(epoch!==sessionEpoch.current)return false;
+      activeUser.current=user;
+      try {if(Platform.OS!=='web')setPendingCount((await outbox.list(user)).length);}catch(e){Alert.alert("Fila de envios",e.message);}
       setMe(user); setOrders(os); setStats(dashboard); setCustomers(clients); setTeam(people);
       return true;
     } catch (err) {
@@ -199,15 +211,31 @@ function AppContent() {
   async function logout() {
     try {await api('/auth/logout','POST',{});} catch(e) {if(e.status!==401){Alert.alert('Não foi possível revogar a sessão',e.message);return;}}
     sessionEpoch.current++;
+    activeUser.current=null;setPendingCount(0);
     await session.clear();setPhotos([]);setNotes('');setPassword('');setStats(null);setCustomerName('');setCustomerPhone('');setCustomerAddress('');setNewName('');setNewEmail('');setNewPassword('');setOrderTitle('');setDescription('');setCustomerId('');setTechId('');pendingRequests.current.clear();pendingVisit.current=null;setVisits([]);setReports([]);setPhotos([]);setNotes('');
     setToken(''); setMe(null); setTab('home'); setSelected(null);
     setPassword(''); setOrders([]); setStats(null); setCustomers([]); setTeam([]);
+  }
+  async function syncPending() {
+    const user=activeUser.current,epoch=sessionEpoch.current;
+    if(!user)return;
+    setBusy(true);
+    try {
+      const pending=await outbox.list(user);
+      for(const item of pending){
+        if(epoch!==sessionEpoch.current)return;
+        await api(item.path,'POST',item.body,token,item);
+      }
+      await load(token,true);Alert.alert('Sincronização concluída','Todos os envios foram confirmados.');
+    }catch(e){Alert.alert('Sincronização interrompida',e.message+' Os registros não confirmados continuam no aparelho.');}
+    finally{setBusy(false);}
   }
   async function reload() { setRefreshing(true); await load(token); setRefreshing(false); }
   async function save(path, body, onSuccess, message = 'Registro salvo com sucesso.') {
     setBusy(true);
     try {
-      await api(path, 'POST', body);
+      const result=await api(path, 'POST', body);
+      if(result?.queued){onSuccess?.();Alert.alert('Salvo no aparelho','Envio pendente. Use Sincronizar envios quando houver conexão.');return;}
       await load(token, true);
       onSuccess?.(); Alert.alert('Tudo certo!', message);
     } catch (err) { Alert.alert('Não foi possível salvar', err.message); }
@@ -243,7 +271,8 @@ function AppContent() {
         body={kind,latitude:location.coords.latitude,longitude:location.coords.longitude,accuracy:location.coords.accuracy,photo_data:photo};
         pendingVisit.current={order:selected.id,kind,body};
       }
-      await api(`/orders/${selected.id}/visits`,'POST',body);
+      const result=await api(`/orders/${selected.id}/visits`,'POST',body);
+      if(result?.queued){pendingVisit.current=null;Alert.alert('Salvo no aparelho','Visita pendente de confirmação. Use Sincronizar envios quando houver conexão.');return;}
       pendingVisit.current=null;
       await load(token, true);
       if (kind === 'checkin') setSelected(x => x ? { ...x, status: 'in_progress' } : x);
@@ -436,6 +465,9 @@ function AppContent() {
           <PageHeader eyebrow="MINHA CONTA" title="Perfil" subtitle="Suas informações e acesso à plataforma."/>
           <Card style={{ alignItems: 'center', paddingVertical: 30 }}><View style={styles.profileAvatar}><Text style={styles.profileAvatarText}>{initials(me.name)}</Text></View><Text style={styles.profileName}>{me.name}</Text><Text style={styles.profileRole}>{manager ? 'Administrador / Gestor' : 'Técnico de campo'}</Text><View style={[styles.roleBadge, { marginTop: 14 }]}><Icon name="checkmark-circle" size={14} color={P.green}/><Text style={[styles.roleBadgeText, { color: P.green }]}>Conta ativa</Text></View></Card>
           <Card><InfoRow icon="mail-outline" label="E-mail" value={me.email}/><View style={styles.detailDivider}/><InfoRow icon="shield-outline" label="Permissão" value={manager ? 'Gestor' : 'Técnico'}/><View style={styles.detailDivider}/><InfoRow icon="cloud-done-outline" label="Plataforma" value="EWS Field"/></Card>
+          <Text style={styles.fieldLabel}>Envios pendentes neste aparelho: {pendingCount}</Text>
+          <TButton label="Sincronizar envios" icon="refresh-outline" disabled={busy || !pendingCount} onPress={syncPending}/>
+          {pendingCount>0 && <TButton label="Descartar envios pendentes" variant="outline" disabled={busy} onPress={()=>Alert.alert('Descartar envios','Os registros ainda não confirmados serão apagados deste aparelho. Esta ação não remove registros do servidor.',[{text:'Cancelar',style:'cancel'},{text:'Descartar',style:'destructive',onPress:async()=>{try{await outbox.clear(activeUser.current);setPendingCount(0);}catch(e){Alert.alert('Falha',e.message);}}}])}/>}
           <TButton label="Sair da minha conta" icon="log-out-outline" variant="outline" onPress={() => Alert.alert('Sair', 'Deseja encerrar sua sessão?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Sair', style: 'destructive', onPress: logout }])}/>
           <Text style={styles.profileFooter}>EWS FIELD  •  VERSÃO 2.0</Text>
         </View>}

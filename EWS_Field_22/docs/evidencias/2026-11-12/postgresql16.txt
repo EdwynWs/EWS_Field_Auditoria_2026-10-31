@@ -1,0 +1,56 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> ews-field@2.0.0 test
+> npm run test -w backend
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> backend@2.0.0 test
+> node --test --test-concurrency=1 test/*.test.js
+
+✔ backup hashes file streams and rejects symlink traversal (11.563138ms)
+✔ backup refuses unpaused writes and recursive destinations before pg_dump (0.46927ms)
+✔ backup CLI executes and fails explicitly when configuration is missing (50.774601ms)
+Integration engine: PostgreSQL server
+✔ health and readiness (1862.731533ms)
+✔ missing, malformed, expired and wrong-audience JWT rejected (5.718306ms)
+✔ company isolation in lists, customers, users, dashboard (13.559075ms)
+✔ order search filters remain scoped to tenant and assigned technician (16.195275ms)
+✔ company exports are manager-only, paginated and omit authentication secrets (10.162192ms)
+✔ technician cannot access manager functions or peer orders (11.915104ms)
+✔ cross-tenant foreign keys denied by API and database (21.541356ms)
+✔ IDOR denied for status, visits, reports, assignment and media (39.859967ms)
+✔ tenant and role supplied by client cannot override server authority (3.959674ms)
+✔ invalid UUID, SQL injection, invalid JSON and payload limits (137.906263ms)
+✔ password length, UTF-8 bcrypt truncation and field bounds (9.731328ms)
+✔ assignment after creation validates company and active technician (8.565099ms)
+✔ checkout without checkin, early completion and manual start rejected (10.985799ms)
+✔ uploads reject SVG, spoofed image, excessive resolution and poor GPS (7.892697ms)
+✔ concurrent duplicate checkins create exactly one visit (13.874175ms)
+✔ image decoder rejects excessive pixels and reports reject more than five photos (184.401412ms)
+✔ private photos require owning company or assigned technician; base64 not persisted (11.254459ms)
+✔ active visit blocks cancellation and reassignment (5.789672ms)
+✔ idempotent checkout replay; changed payload with same key rejected (15.435273ms)
+✔ report idempotency, photo authorization, completion and immutable closed order (33.922485ms)
+✔ manager can cancel an active visit with a reason, retaining evidence (21.299143ms)
+✔ pagination is bounded and deterministic (10.665001ms)
+✔ marketing persists validated consent, ignores honeypot, rejects invalid email (15.154373ms)
+✔ logout revokes a token on all protected endpoints (9.232074ms)
+✔ deactivation revokes sessions and reactivation does not revive old tokens (14.072411ms)
+✔ current role and company suspension are enforced on every request (5.002197ms)
+✔ password change revokes all sessions and old password fails (911.581151ms)
+✔ support recovery expires, is single-use and revokes all sessions (1996.350961ms)
+✔ shared database rate limiter emits 429 (7.550838ms)
+✔ logs exclude PII, passwords, JWTs, coordinates and request bodies (0.336792ms)
+✔ production config fails closed without HTTPS and strong secret (0.301199ms)
+✔ migration keeps legacy records and base64 evidence, and is repeatable (44.978417ms)
+✔ cross-tenant legacy corruption aborts migration without changing or deleting records (21.931378ms)
+✔ durable outbox ciphertext survives reload and rejects another account or tampering (3.290186ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6181.650714

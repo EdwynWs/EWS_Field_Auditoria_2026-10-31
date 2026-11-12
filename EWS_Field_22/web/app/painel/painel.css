@@ -41,3 +41,12 @@
 @media(max-width:850px){.ep-sidebar{position:fixed;transform:translateX(-100%);transition:transform .25s;box-shadow:10px 0 45px #0004}.ep-sidebar-open{transform:translateX(0)}.ep-overlay{position:fixed;display:block;inset:0;background:#050c1888;border:0;z-index:35}.ep-mobile-close,.ep-menu{display:inline-flex}.ep-sidebar-top{display:flex;align-items:center;justify-content:space-between;padding-left:8px;padding-right:8px}.ep-topbar{height:66px}.ep-top-status{display:none}.ep-main{padding:32px 24px}.ep-login-layout{grid-template-columns:1fr}.ep-login-art{min-height:300px}.ep-art-copy{bottom:22%}.ep-map-network{opacity:.6}.ep-login-card{max-width:570px;padding:35px 12px}.ep-login-page .ep-login-top{height:75px}.ep-login-art .ep-glass-status{top:19%}}
 @media(max-width:600px){.ep-main{padding:28px 16px}.ep-topbar{padding:0 17px}.ep-top-left{gap:10px}.ep-top-right{gap:7px}.ep-breadcrumb,.ep-breadcrumb-arrow{display:none}.ep-pagehead{align-items:flex-start;flex-direction:column}.ep-pagehead .ep-btn{width:100%}.ep-hero{min-height:250px}.ep-hero-content{padding:27px}.ep-hero-art{opacity:.2;right:-75px}.ep-statgrid{gap:10px}.ep-stat{padding:17px 14px}.ep-stat strong{font-size:29px}.ep-stat-label{font-size:10px}.ep-stat small{font-size:9px}.ep-panel-head{padding:22px 17px}.ep-order{padding:16px 13px;gap:10px}.ep-order-icon{width:32px;height:32px}.ep-order-icon svg{width:17px}.ep-order-meta small{display:none}.ep-order-arrow{display:none}.ep-order-meta .ep-status{font-size:8px;padding:5px}.ep-filters{padding:15px;flex-direction:column}.ep-filters select{width:100%}.ep-search{width:100%}.ep-detail{padding:18px}.ep-detail-grid{grid-template-columns:1fr 1fr}.ep-detail-top{flex-direction:column}.ep-footer{padding:18px;flex-wrap:wrap}.ep-modal-head,.ep-modal-form{padding:20px}.ep-login-art{display:none}.ep-login-top{padding:0 21px}.ep-login-layout{padding:12px 22px}.ep-login-card{padding:30px 0}.ep-login-card h1{font-size:35px}.ep-top-left strong{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.ep-app *, .ep-login-page * {animation:none!important;transition:none!important}}
+
+@media print {
+  body { background: white !important; color: black !important; }
+  body * { visibility: hidden; }
+  .ep-detail, .ep-detail * { visibility: visible; }
+  .ep-detail { position:absolute; inset:0; width:100%; box-shadow:none !important; border:0 !important; }
+  .ep-detail button, .ep-detail select, .ep-no-print { display:none !important; }
+  .ep-history-item { break-inside:avoid; }
+}
