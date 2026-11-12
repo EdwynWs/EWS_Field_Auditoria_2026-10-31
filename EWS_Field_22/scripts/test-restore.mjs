@@ -91,7 +91,7 @@ try {
     throw Error("Foto não restaurada.");
   if (
     (await target.query("SELECT count(*)::int AS n FROM schema_migrations"))
-      .rows[0].n !== 2
+      .rows[0].n !== 3
   )
     throw Error("Migrations ausentes.");
   console.log(

@@ -1,5 +1,6 @@
 name: Commercial readiness
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches: [main, "security/**"]
@@ -12,6 +13,9 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: EWS_Field_22
     services:
       postgres:
         image: postgres:16
@@ -34,6 +38,9 @@ jobs:
         with:
           node-version: "22"
           cache: npm
+          cache-dependency-path: EWS_Field_22/package-lock.json
+      - name: Use PostgreSQL 16 client tools
+        run: echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
       - run: npm ci
       - run: npm run check
       - run: node scripts/scan-secrets.mjs

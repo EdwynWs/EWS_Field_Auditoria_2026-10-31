@@ -1,0 +1,49 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> ews-field@2.0.0 build:web
+> npm run build -w web
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> web@2.0.0 build
+> next build
+
+   ▲ Next.js 15.5.28
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 2.1s
+   Linting and checking validity of types ...
+
+ ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
+   Collecting page data ...
+   Generating static pages (0/13) ...
+ ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+   Generating static pages (3/13) 
+   Generating static pages (6/13) 
+   Generating static pages (9/13) 
+ ✓ Generating static pages (13/13)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    13.4 kB         119 kB
+├ ○ /_not-found                            995 B         103 kB
+├ ƒ /api/leads                             138 B         102 kB
+├ ƒ /api/panel/[...path]                   138 B         102 kB
+├ ƒ /api/signup                            138 B         102 kB
+├ ○ /comecar                             3.11 kB         108 kB
+├ ○ /manifest.webmanifest                  138 B         102 kB
+├ ○ /painel                              11.8 kB         117 kB
+├ ○ /privacidade                         2.41 kB         108 kB
+├ ○ /recuperar                           1.16 kB         106 kB
+├ ○ /robots.txt                            138 B         102 kB
+└ ○ /sitemap.xml                           138 B         102 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/131-445671fb2fcaaadf.js       45.7 kB
+  ├ chunks/c7879cf7-b5ab1053c1d9a2e7.js  54.2 kB
+  └ other shared chunks (total)          1.94 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

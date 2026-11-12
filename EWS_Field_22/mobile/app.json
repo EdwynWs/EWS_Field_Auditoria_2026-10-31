@@ -19,7 +19,8 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
-      "versionCode": 1
+      "versionCode": 1,
+      "allowBackup": false
     },
     "ios": {
       "bundleIdentifier": "com.ewstech.ewsfield",
@@ -50,6 +51,12 @@
         "projectId": "535fa246-8385-4295-a7fd-4fc85549250f"
       }
     },
-    "owner": "edwyn007"
+    "owner": "edwyn007",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0b1220"
+    }
   }
 }

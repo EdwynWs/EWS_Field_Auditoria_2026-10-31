@@ -2,7 +2,7 @@ EWS Field — Roadmap do SaaS
 EWS Tech | Gestão de assistência técnica e equipes externas
 
 O EWS Field é um SaaS para empresas gerenciarem técnicos, clientes, ordens de serviço e visitas em campo, com painel Next.js, API Node.js/Express + PostgreSQL e aplicativo Expo/React Native.
-Revisão do código: 04/11/2026. O produto possui uma base funcional e evidências de testes locais, mas ainda não foi homologado para clientes reais nem aprovado para lançamento comercial.
+Revisão do código: 12/11/2026. Veja a [entrega técnica e evidências](EWS_Field_22/docs/ENTREGA-2026-11-12.md). O produto possui uma base funcional e evidências de testes locais, mas ainda não foi homologado para clientes reais nem aprovado para lançamento comercial.
 
 Legenda: [x] = implementação identificada no repositório ou evidência registrada (não significa aprovação em produção). [ ] = pendente, incompleto ou ainda sem validação adequada. P0 = crítico; P1 = necessário para piloto; P2 = evolução futura.
 
@@ -15,8 +15,8 @@ Responsável: A definir
 - [x] Criar migrações SQL com checksum, transação e lock.
 - [x] Criar tabelas de sessões, auditoria, mídia privada e idempotência.
 - [x] Adicionar chaves estrangeiras compostas para isolamento entre empresas.
-- [ ] Criar exemplos de configuração .env.example para cada serviço (não identificados neste pacote), sem credenciais reais.
-- [ ] Testar migrações e integridade em PostgreSQL 16 nativo.
+- [x] Criar exemplos de configuração .env.example para cada serviço, sem credenciais reais.
+- [x] Testar migrações e integridade em PostgreSQL 16.15 nativo (37 testes em 12/11).
 - [ ] Testar migrações em cópia sanitizada e procedimento de rollback.
 2. Autenticação, segurança e multiempresa — P0
 Responsável: A definir
@@ -29,7 +29,7 @@ Responsável: A definir
 - [x] Criar testes de isolamento A/B, IDOR, permissões e expiração de sessão.
 - [ ] Validar esses controles com PostgreSQL real e infraestrutura HTTPS.
 - [ ] Validar CSRF, CORS, cookies Secure, proxy e limites de requisição em homologação.
-- [ ] Criar fluxo seguro de recuperação de acesso e suporte à conta.
+- [x] Implementar recuperação assistida com token temporário, uso único e revogação de sessões. Canal operacional de suporte ainda precisa ser definido.
 - [ ] Revisar riscos de segurança residuais antes do primeiro cliente.
 3. Backend — Operação de campo — P0/P1
 Responsável: A definir
@@ -42,8 +42,9 @@ Responsável: A definir
 - [x] Implementar reenvio idempotente de visitas e relatórios.
 - [x] Paginar listagens da API.
 - [ ] Testar o ciclo completo de atendimento com múltiplas empresas e dados realistas.
-- [ ] Melhorar pesquisa global, filtros e consultas com muitos registros.
-- [ ] Validar concorrência e transações no PostgreSQL nativo.
+- [x] Implementar pesquisa de ordens e filtros no servidor e integrar ao painel.
+- [ ] Medir e otimizar consultas com volume representativo.
+- [x] Validar concorrência e transações nos testes automatizados em PostgreSQL 16.15 nativo.
 4. Frontend — Landing e painel web — P1
 Responsável: A definir
 - [x] Criar landing premium responsiva com seções comerciais.
@@ -57,7 +58,7 @@ Responsável: A definir
 - [ ] Medir Lighthouse/Core Web Vitals e corrigir gargalos.
 - [ ] Adicionar prova social apenas com empresas, depoimentos e números verificados/autorizados.
 - [ ] Publicar web e configurar domínio/ambiente de homologação.
-- [ ] Implementar PWA instalável (manifest e service worker), se mantido no escopo comercial.
+- [x] Implementar manifesto, ícones e service worker sem cache de dados privados. Instalação em dispositivos reais pendente.
 5. Mobile — Expo, GPS e Android — P1
 Responsável: A definir
 - [x] Criar aplicativo Expo/React Native com fluxos de gestor e técnico.
@@ -71,7 +72,8 @@ Responsável: A definir
 - [ ] Configurar EXPO_PUBLIC_API_URL HTTPS nos ambientes EAS.
 - [ ] Gerar APK real e instalar em Android sem Expo Go.
 - [ ] Testar GPS, câmera, permissões negadas, rede móvel, logout e expiração de sessão em aparelho físico.
-- [ ] Criar fila offline durável e sincronização segura após reiniciar o app.
+- [x] Implementar fila cifrada de reenvio, separada por conta e com sincronização manual após autenticação.
+- [ ] Homologar fila, SecureStore, reinício e troca de conta em aparelho físico; operação integralmente offline não está implementada.
 - [ ] Gerar AAB e preparar assinatura e submissão à Google Play.
 6. Testes e CI — P0/P1
 Responsável: A definir
@@ -81,7 +83,8 @@ Responsável: A definir
 - [x] Registrar build Next.js e exportação Expo Android (bundle, não APK).
 - [x] Criar scripts de formatação, revisão e checagem limitada de segredos.
 - [x] Escrever configuração de GitHub Actions com PostgreSQL 16.
-- [ ] Ativar a CI neste repositório: o workflow está em EWS_Field_22/.github/workflows/ci.yml, mas o GitHub exige .github/workflows/ na raiz do repositório.
+- [x] Mover workflow para .github/workflows/ na raiz e ajustar diretórios do monorepo.
+- [ ] Confirmar execução remota verde após disponibilizar a branch.
 - [ ] Executar workflow remoto e configurar checks obrigatórios na branch principal.
 - [ ] Executar testes com PostgreSQL 16, concorrência, restauração e dados representativos.
 - [ ] Testar desempenho, acessibilidade e o APK em aparelho real.
@@ -127,7 +130,7 @@ Evidência versionada	Resultado registrado
 [Build/export em 01/11/2026](EWS_Field_22/EVIDENCIAS/v5-build-export-confirmado.txt)	Next compilado + bundle Android; sem APK
 
 
-Os resultados acima são registros já existentes no repositório. Esta atualização do README não executou testes novos, deploy, migrações ou build de APK. Veja também o [relatório de auditoria](EWS_Field_22/AUDITORIA.md).
+Os resultados da tabela acima são registros anteriores; os novos testes estão na [entrega de 12/11](EWS_Field_22/docs/ENTREGA-2026-11-12.md). A revisão anterior do README não executou testes. Nesta entrega houve testes e builds locais documentados; não houve deploy nem build de APK. Veja também o [relatório de auditoria](EWS_Field_22/AUDITORIA.md).
 
 Desenvolvimento local
 Dentro de EWS_Field_22/, configure primeiro as variáveis privadas de ambiente conforme o [README técnico](EWS_Field_22/README.md) e o [guia de deploy](EWS_Field_22/docs/DEPLOY.md). Não publique senhas, tokens nem banco de produção.

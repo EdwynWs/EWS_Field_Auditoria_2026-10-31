@@ -78,7 +78,28 @@ export function ordersRouter(db, config) {
     wrap(async (req, res) => {
       const page = pagination(req);
       const args = [req.user.companyId];
-      const filter = scope(req, args);
+      let filter = scope(req, args);
+      const filters = parse(
+        z.object({
+          q: text(120).optional(),
+          status: z
+            .enum(["open", "assigned", "in_progress", "completed", "cancelled"])
+            .optional(),
+          technician_id: uuid.optional(),
+          customer_id: uuid.optional(),
+        }),
+        req.query,
+      );
+      if (filters.q) {
+        args.push(filters.q);
+        filter += ` AND (strpos(lower(o.title),lower($${args.length}))>0 OR strpos(lower(c.name),lower($${args.length}))>0 OR strpos(lower(coalesce(u.name,'')),lower($${args.length}))>0)`;
+      }
+      for (const field of ["status", "technician_id", "customer_id"]) {
+        if (filters[field]) {
+          args.push(filters[field]);
+          filter += ` AND o.${field}=$${args.length}`;
+        }
+      }
       args.push(page.limit + 1, page.offset);
       const q = await db.query(
         `SELECT o.*,c.name AS customer_name,u.name AS technician_name FROM orders o JOIN customers c ON c.id=o.customer_id AND c.company_id=o.company_id LEFT JOIN users u ON u.id=o.technician_id AND u.company_id=o.company_id WHERE o.company_id=$1 ${filter} ORDER BY o.created_at DESC,o.id LIMIT $${args.length - 1} OFFSET $${args.length}`,

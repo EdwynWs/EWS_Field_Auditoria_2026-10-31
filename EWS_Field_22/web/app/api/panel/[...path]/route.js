@@ -12,13 +12,16 @@ export const dynamic = "force-dynamic";
 const id = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const rules = {
   GET: [
+    /^company\/export\/(users|customers|orders|visits|reports|media|report_media)$/,
     /^(me|dashboard|users|customers|orders)$/,
     new RegExp(`^orders/${id}/(visits|reports)$`),
     new RegExp(`^orders/${id}/media/${id}$`),
     new RegExp(`^orders/${id}/visits/${id}/photo$`),
     new RegExp(`^orders/${id}/reports/${id}/photos/[0-4]$`),
   ],
-  POST: [/^(auth\/(login|logout|password)|users|customers|orders)$/],
+  POST: [
+    /^(auth\/(login|logout|password|reset-password)|users|customers|orders)$/,
+  ],
   PATCH: [
     new RegExp(`^orders/${id}/(status|assignment)$`),
     new RegExp(`^users/${id}/active$`),
@@ -32,7 +35,7 @@ async function forward(req, context) {
   if (req.method !== "GET" && !sameOrigin(req))
     return jsonError("Origem não autorizada.", 403);
   const token = req.cookies.get(cookieName)?.value;
-  if (route !== "auth/login" && !token)
+  if (!["auth/login", "auth/reset-password"].includes(route) && !token)
     return jsonError("Não autenticado.", 401);
   try {
     const headers = { Accept: "application/json" };
@@ -41,7 +44,14 @@ async function forward(req, context) {
     const body = req.method === "GET" ? undefined : await limitedBody(req);
     if (body !== undefined) headers["Content-Type"] = "application/json";
     const query = new URLSearchParams();
-    for (const key of ["limit", "offset"]) {
+    for (const key of [
+      "limit",
+      "offset",
+      "q",
+      "status",
+      "technician_id",
+      "customer_id",
+    ]) {
       const val = new URL(req.url).searchParams.get(key);
       if (val !== null) query.set(key, val);
     }
@@ -82,7 +92,10 @@ async function forward(req, context) {
     }
     if (route === "auth/login" && upstream.ok) setSession(res, sessionToken);
     if (
-      ((route === "auth/logout" || route === "auth/password") && upstream.ok) ||
+      ((route === "auth/logout" ||
+        route === "auth/password" ||
+        route === "auth/reset-password") &&
+        upstream.ok) ||
       upstream.status === 401
     )
       setSession(res, "");
