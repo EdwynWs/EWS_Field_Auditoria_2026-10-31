@@ -139,7 +139,7 @@ export default function PainelPage() {
   const filteredOrders = orders;
   const orderQuery = new URLSearchParams({ ...(search.trim() ? { q: search.trim() } : {}), ...(filter !== 'all' ? { status: filter } : {}) }).toString();
   useEffect(() => {
-    if (!me || tab !== 'orders') return;
+    if (!me || !['orders', 'overview'].includes(tab)) return;
     const epoch = sessionEpoch.current;
     let active = true;
     const timer = setTimeout(() => {
