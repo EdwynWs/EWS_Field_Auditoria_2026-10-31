@@ -47,8 +47,8 @@ try {
   await mkdir(path.join(temp, "media"));
   await writeFile(path.join(temp, "media", id + ".jpg"), bytes);
   await source.query(
-    "INSERT INTO media(id,company_id,order_id,object_key,mime_type,size_bytes) VALUES($1,$2,$3,$1,'image/jpeg',$4)",
-    [id, company.id, order.id, bytes.length],
+    "INSERT INTO media(id,company_id,order_id,object_key,mime_type,size_bytes) VALUES($1,$2,$3,$5,'image/jpeg',$4)",
+    [id, company.id, order.id, bytes.length, id],
   );
   process.env.BACKUP_WRITES_PAUSED = "true";
   const destination = path.join(temp, "snapshot");
